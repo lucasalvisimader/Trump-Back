@@ -12,7 +12,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class UserDTO {
     @NotEmpty
-    private String name;
+    private String username;
     @NotEmpty
     private String password;
     private List<Card> cards;

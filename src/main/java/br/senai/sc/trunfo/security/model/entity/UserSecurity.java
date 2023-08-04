@@ -1,4 +1,4 @@
-package br.senai.sc.trunfo.security.model;
+package br.senai.sc.trunfo.security.model.entity;
 
 import br.senai.sc.trunfo.model.entity.User;
 import jakarta.persistence.*;

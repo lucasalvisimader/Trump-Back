@@ -1,12 +1,11 @@
 package br.senai.sc.trunfo.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -30,4 +29,9 @@ public class User {
     @ManyToMany
     @JoinColumn(name = "id_player")
     private List<Card> cards;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }

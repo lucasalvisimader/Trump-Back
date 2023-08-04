@@ -2,37 +2,51 @@ package br.senai.sc.trunfo.init;
 
 import br.senai.sc.trunfo.controller.CardController;
 import br.senai.sc.trunfo.model.dto.CardDTO;
-import br.senai.sc.trunfo.model.entity.Card;
 import br.senai.sc.trunfo.model.enums.ImageType;
 import br.senai.sc.trunfo.model.enums.SigilsType;
+import br.senai.sc.trunfo.security.controller.UserSecurityController;
+import br.senai.sc.trunfo.security.model.dto.UserSecurityDTO;
+import br.senai.sc.trunfo.security.model.entity.UserSecurity;
+import br.senai.sc.trunfo.security.service.JpaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import br.senai.sc.trunfo.controller.UserController;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
-import br.senai.sc.trunfo.model.dto.UserDTO;
+
 import java.util.List;
 
 @Component
 public class StartUpComponent implements CommandLineRunner {
     private CardController cardController;
-    private UserController userController;
+    private JpaService jpaService;
+    private UserSecurityController userSecurityController;
+
     @Autowired
     private void setCardController(CardController cardController) {
         this.cardController = cardController;
     }
+
     @Autowired
-    private void setUserController(UserController userController) {
-        this.userController = userController;
+    private void setJpaService(JpaService jpaService) {
+        this.jpaService = jpaService;
     }
+
+    @Autowired
+    private void setUserSecurityController(UserSecurityController userSecurityController) {
+        this.userSecurityController = userSecurityController;
+    }
+
     @Value("${global.admin.username}")
     private String adminUsername;
+
     @Value("${global.admin.password}")
     private String adminPassword;
 
     @Override
     public void run(String... args) {
-        if (!(userController.listLogin(adminUsername, adminPassword).hasBody())) {
+        UserSecurity loadedUser = (UserSecurity) jpaService.loadUserByUsername(adminUsername);
+        if (loadedUser == null) {
             saveCardInit(new CardDTO("SQUIRREL", 0, 1, List.of(SigilsType.NONE), ImageType.SQUIRREL));
             saveCardInit(new CardDTO("STOAT", 1, 3, List.of(SigilsType.NONE), ImageType.STOAT));
             saveCardInit(new CardDTO("STINKBUG", 1, 2, List.of(SigilsType.STINKY), ImageType.STINKBUG));
@@ -93,15 +107,14 @@ public class StartUpComponent implements CommandLineRunner {
             saveCardInit(new CardDTO("CAT", 0, 1, List.of(SigilsType.MANYLIVES), ImageType.CAT));
             saveCardInit(new CardDTO("UNDEAD CAT", 3, 6, List.of(SigilsType.NONE), ImageType.UNDEADCAT));
             saveCardInit(new CardDTO("MOLE", 0, 4, List.of(SigilsType.BURROWER), ImageType.MOLE));
-            saveUserInit(new UserDTO(adminUsername, adminPassword, null));
+            UserSecurityDTO userSecurityDTO = new UserSecurityDTO();
+            userSecurityDTO.setUsername(adminUsername);
+            userSecurityDTO.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
+            userSecurityController.saveAdmin(userSecurityDTO);
         }
     }
 
     private void saveCardInit(CardDTO cardDTO) {
         cardController.save(cardDTO);
-    }
-
-    private void saveUserInit(UserDTO userDTO) {
-        userController.saveAdmin(userDTO);
     }
 }
